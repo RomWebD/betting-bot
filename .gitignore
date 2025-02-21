@@ -1,0 +1,55 @@
+# Byte-compiled / cached / compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C Extensions
+*.so
+
+# SQLite database
+*.db
+*.sqlite3
+
+# JSON cache files
+data/*.json
+
+# Env files
+.env
+.env.*
+
+# VSCode settings
+.vscode/
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Test and Coverage reports
+coverage/
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Logs and debugging
+*.log
+*.bak
+*.swp
+
+# FastAPI specific
+__pypackages__/
+
+# macOS
+.DS_Store
+
+# System files
+Thumbs.db
