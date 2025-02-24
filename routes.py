@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from betting_utils import get_data_from_match, get_name_of_blocks
-from crud import add_blocks_to_db, add_markets_to_db
+from betting_utils import get_data_from_match
+
+# , get_name_of_blocks
+# from crud import add_blocks_to_db, add_markets_to_db
 from database import get_db
 from schemas import BlockCreate
 from cache import cache

@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
 from database import SessionLocal
-from models import Block, Market
+from models.block import Block
+from models.market import Market
 
 # Загальні налаштування
 DATA_DIR = Path("data")
@@ -61,8 +62,8 @@ def cache_all_tables():
 
         # Якщо JSON існує – завантажуємо, якщо ні – створюємо
         if json_file.exists():
-            cache[key] = get_from_json(json_file)
-        else:
-            cache[key] = load_to_json(
-                config["model"], json_file, id_field, config["fields"]
-            )
+            json_file.unlink()  # Видаляє файл
+
+        cache[key] = load_to_json(
+            config["model"], json_file, id_field, config["fields"]
+        )

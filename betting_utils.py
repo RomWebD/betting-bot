@@ -16,20 +16,32 @@ def get_data_from_match(id=598606097):
 def transform_data(data):
     blocks_list = []
     market_list = []
+    unique_block_ids = set()  # Для зберігання унікальних block_id
+    unique_market_ids = set()  # Для зберігання унікальних market_id
+
     for d in data:
         for c in data[d]:
             entity = data[d][c]
             blocks = entity["GN"]
             markets = entity["M"]
-            data_blocks = [
-                {"block_id": key, "block_name": value} for key, value in blocks.items()
-            ]
-            data_market = [
-                {"market_id": key, "market_name": value["N"]}
-                for key, value in markets.items()
-            ]
-            blocks_list.extend(data_blocks)
-            market_list.extend(data_market)
+            # data_blocks = [
+            #     {"block_id": key, "block_name": value} for key, value in blocks.items()
+            # ]
+            # data_market = [
+            #     {"market_id": key, "market_name": value["N"]}
+            #     for key, value in markets.items()
+            # ]
+
+            for key, value in blocks.items():
+                if key not in unique_block_ids:
+                    blocks_list.extend([{"block_id": key, "block_name": value}])
+                    unique_block_ids.add(key)
+
+            # Обробка маркетів з перевіркою на унікальність
+            for key, value in markets.items():
+                if key not in unique_market_ids:
+                    market_list.extend([{"market_id": key, "market_name": value["N"]}])
+                    unique_market_ids.add(key)
     return blocks_list, market_list
 
 
