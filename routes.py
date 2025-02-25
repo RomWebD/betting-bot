@@ -1,6 +1,7 @@
+import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from betting_utils import get_data_from_match
+from betting_utils import get_coefficients_from_match, get_list_of_match
 
 # , get_name_of_blocks
 # from crud import add_blocks_to_db, add_markets_to_db
@@ -13,8 +14,11 @@ router = APIRouter()
 
 @router.post("/add_blocks")
 def add_block(block: BlockCreate, db: Session = Depends(get_db)):
-    data = get_data_from_match(id=598606097)
-    print(cache)
+    now = datetime.datetime.now()
+    print(now)
+    matches = get_list_of_match()
+    coefficients = get_coefficients_from_match(id=599807400)
+    print()
     new_block = ""
     # new_block = Block(col1=block.col1, col2=block.col2)
     # db.add(new_block)

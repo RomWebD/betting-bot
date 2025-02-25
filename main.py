@@ -14,8 +14,8 @@ async def lifespan(app: FastAPI):
     # Події startup
     print("Запуск Lifespan: startup")
     Base.metadata.create_all(bind=engine)  # Створення таблиць
-    update_blocks_daily()
-    start_scheduler()  # Запуск планувальника
+    # update_blocks_daily()
+    # start_scheduler()  # Запуск планувальника
     # Якщо JSON-файл не існує, створюємо його
     cache_all_tables()
 

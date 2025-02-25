@@ -1,7 +1,6 @@
 import json
 from sqlalchemy.orm import Session
 from models.block import Block
-from models.market import Market
 from database import SessionLocal
 
 

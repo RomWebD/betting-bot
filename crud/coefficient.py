@@ -4,15 +4,30 @@ from models.coefficient import Coefficient
 
 # Створення нового запису коефіцієнтів
 def create_coefficient(
-    db: Session, match_id: str, block_id: str, market_id: str, values: list
+    db: Session,
+    match_id: str,
+    block_id: str,
+    market_id: str,
+    values: dict,
+    score1: int,
+    score2: int,
+    period: str,
+    time: str,
 ):
-    coefficient = Coefficient(
-        match_id=match_id, block_id=block_id, market_id=market_id, values=values
+    new_coefficient = Coefficient(
+        match_id=match_id,
+        block_id=block_id,
+        market_id=market_id,
+        values=values,
+        score1=score1,
+        score2=score2,
+        period=period,
+        time=time,
     )
-    db.add(coefficient)
+    db.add(new_coefficient)
     db.commit()
-    db.refresh(coefficient)
-    return coefficient
+    db.refresh(new_coefficient)
+    return new_coefficient
 
 
 # Отримання коефіцієнтів для матчу
