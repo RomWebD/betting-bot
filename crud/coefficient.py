@@ -6,23 +6,23 @@ from models.coefficient import Coefficient
 def create_coefficient(
     db: Session,
     match_id: str,
-    block_id: str,
-    market_id: str,
     values: dict,
     score1: int,
     score2: int,
+    cp: int,
     period: str,
+    quarter_account,
     time: str,
 ):
     new_coefficient = Coefficient(
         match_id=match_id,
-        block_id=block_id,
-        market_id=market_id,
         values=values,
         score1=score1,
         score2=score2,
         period=period,
+        quarter_account=quarter_account,
         time=time,
+        cp=cp,
     )
     db.add(new_coefficient)
     db.commit()

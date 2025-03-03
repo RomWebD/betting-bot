@@ -1,0 +1,40 @@
+COPY (
+    SELECT 
+        c.match_id, 
+        m.league, 
+        m.team1, 
+        m.team2, 
+        m.status,
+        c.period, 
+        c.time, 
+        c.score1, 
+        c.score2, 
+        c.cp,
+        
+        -- Витягуємо Total для всього матчу
+        (SELECT elem->'coefficient_data' 
+         FROM jsonb_array_elements(c.values::jsonb) AS elem
+         WHERE elem->>'block_name' LIKE 'Total' 
+           AND elem->>'block_name' NOT LIKE '%quarter') AS "Total - Full Match",
+        
+        -- Витягуємо Total для кожної чверті
+        (SELECT elem->'coefficient_data' 
+         FROM jsonb_array_elements(c.values::jsonb) AS elem
+         WHERE elem->>'block_name' LIKE 'Total 1st quarter') AS "Total - 1st Quarter",
+
+        (SELECT elem->'coefficient_data' 
+         FROM jsonb_array_elements(c.values::jsonb) AS elem
+         WHERE elem->>'block_name' LIKE 'Total 2nd quarter') AS "Total - 2nd Quarter",
+
+        (SELECT elem->'coefficient_data' 
+         FROM jsonb_array_elements(c.values::jsonb) AS elem
+         WHERE elem->>'block_name' LIKE 'Total 3rd quarter') AS "Total - 3rd Quarter",
+
+        (SELECT elem->'coefficient_data' 
+         FROM jsonb_array_elements(c.values::jsonb) AS elem
+         WHERE elem->>'block_name' LIKE 'Total 4th quarter') AS "Total - 4th Quarter"
+
+    FROM coefficients c
+    JOIN matches m ON c.match_id = m.match_id
+    WHERE m.created_at >= '2025-02-27'
+) TO '/tmp/coefficients_data.csv' WITH CSV HEADER;

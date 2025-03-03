@@ -13,12 +13,16 @@ class Match(Base):
     league = Column(String)
     team1 = Column(String)
     team2 = Column(String)
-    score_team1 = Column(Integer)
-    score_team2 = Column(Integer)
-    time = Column(String)
+
+    # Статуси матчі
     status = Column(String, default="scheduled")
-    # cps = Column(String)
-    # add_info = Column(String)
+    # scheduled — матч планується,
+    # live — матч в процесі
+    # finished — матч завершився
+
+    curr_period_quarter = Column(String)
+    additional_info = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Відношення до таблиці coefficients
     coefficients = relationship("Coefficient", back_populates="match")

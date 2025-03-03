@@ -5,6 +5,7 @@ from betting_utils import get_coefficients_from_match, get_list_of_match
 
 # , get_name_of_blocks
 # from crud import add_blocks_to_db, add_markets_to_db
+from crud.matches import add_or_update_matches
 from database import get_db
 from schemas import BlockCreate
 from cache import cache
@@ -17,7 +18,9 @@ def add_block(block: BlockCreate, db: Session = Depends(get_db)):
     now = datetime.datetime.now()
     print(now)
     matches = get_list_of_match()
-    coefficients = get_coefficients_from_match(id=599807400)
+    add_or_update_matches(matches)
+    match_id = matches[0]["match_id"]
+    coefficients = get_coefficients_from_match(match_id)
     print()
     new_block = ""
     # new_block = Block(col1=block.col1, col2=block.col2)

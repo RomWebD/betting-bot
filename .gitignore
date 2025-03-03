@@ -14,7 +14,7 @@ log/
 
 # JSON cache files
 data/*.json
-
+data/
 # Env files
 .env
 .env.*

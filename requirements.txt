@@ -8,3 +8,5 @@ pydantic
 requests
 apscheduler
 supervisor
+pandas
+asyncpg

@@ -5,6 +5,7 @@ from config import settings
 
 # Підключення до SQLite
 DATABASE_URL = settings.DATABASE_URL
+ASYNC_DATABASE_URL = settings.ASYNC_DATABASE_URL
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

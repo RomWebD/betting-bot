@@ -18,6 +18,8 @@ class Settings:
     DATABASE_URL: str = (
         f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
-
+    ASYNC_DATABASE_URL: str = (
+        f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 # Ініціалізація налаштувань
 settings = Settings()

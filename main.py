@@ -6,6 +6,7 @@ from scheduler import start_scheduler
 from worker import update_blocks_daily
 from cache import cache_all_tables
 from models import *
+from workers.match_worker import update_matches_in_live
 
 
 # Lifespan для FastAPI
@@ -15,7 +16,8 @@ async def lifespan(app: FastAPI):
     print("Запуск Lifespan: startup")
     Base.metadata.create_all(bind=engine)  # Створення таблиць
     # update_blocks_daily()
-    # start_scheduler()  # Запуск планувальника
+    update_matches_in_live()
+    start_scheduler()  # Запуск планувальника
     # Якщо JSON-файл не існує, створюємо його
     cache_all_tables()
 

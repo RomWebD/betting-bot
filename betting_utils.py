@@ -3,6 +3,8 @@ import requests
 from cache import cache
 import logging
 
+from crud.matches import finish_match_by_id
+
 # Логування
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,17 +20,36 @@ def get_list_of_match():
             values = data.get("Value")
             for value in values:
                 try:
-                    if value["SC"]["CPS"] != "Game finished":
+                    status = ""
+                    match_id = value.get("I")
+                    cps = value.get("SC", {}).get("CPS", "")
+                    cp = value.get("SC", {}).get("CP", "")
+                    # start_coef = value.get("E")
+                    information = value.get("SC", {}).get("I", "")
+                    # Визначення статусу:
+                    if (
+                        information == "The match has not started"
+                        or information == "Pre-match betting"
+                    ):
+                        status = "scheduled"
+                    # elif cps or start_coef:
+                    elif cps:
+                        status = "live"
+                    elif not cps or cps == "Game finished":
+                        status = "finished"
+
+                    if cps != "Game finished":
                         current_data = [
                             {
-                                "match_id": value["I"],  # ID
-                                "league": value["LE"],  # league
-                                "team1": value["O1E"],  # team1
-                                "team2": value["O2E"],  # team2
-                                "CPS": value["SC"]["CPS"],  # CPS
-                                "information": value["SC"][
+                                "match_id": str(value.get("I")),  # ID
+                                "league": value.get("LE"),  # league
+                                "team1": value.get("O1E"),  # team1
+                                "team2": value.get("O2E"),  # team2
+                                "status": status,
+                                "cps": value.get("SC").get("CPS"),  # CPS
+                                "information": value.get("SC").get(
                                     "I"
-                                ],  # additional information
+                                ),  # additional information
                             }
                         ]
                         all_matches.extend(current_data)
@@ -68,14 +89,14 @@ def fetch_coefficients(id):
         return []
 
 
-def get_additional_coefficients(data):
-    return
+def seconds_to_minutes(time_in_seconds):
+    minutes, seconds = divmod(int(time_in_seconds), 60)
+    return f"{minutes:02d}:{seconds:02d}"
 
 
 def filter_total_coefficients(coefficients, period_name=""):
     """Фільтрує коефіцієнти, де в block_name є слово 'Total'"""
     total_coefficients = []
-    part_coefs = []
     for coefs in coefficients:
         block_name = (
             cache["blocks"]
@@ -120,45 +141,61 @@ def extract_coefficients(data, key="GE"):
     return extracted
 
 
-def get_coefficients_from_match(id=598606097):
+def get_coefficients_from_match(match_id=598606097):
+    result = None
     try:
         total_additional_coefficients = []
-        data = fetch_coefficients(id)
+        data = fetch_coefficients(match_id)
+        if not data.get("Success") and not data.get("Value"):
+            finish_match_by_id(match_id)
+            return None
+
         informations = data.get("Value", {}).get("SC", [])
         time_in_seconds = informations.get("TS", "")
-        # Яка чверть текстом, наприклад - '4th quarter'
-        curr_quarter = informations.get("CPS", "")
         # Яка чверть саме цифрою
         cp = informations.get("CP", "")
+        if cp == 1 and not time_in_seconds:
+            return None
+
+        time_in_minute = seconds_to_minutes(time_in_seconds)
+
+        # Який поточний рахунок
+        curr_score = informations.get("FS")
+        # Яка чверть текстом, наприклад - '4th quarter'
+        curr_quarter = informations.get("CPS", "")
         # Рахунки по всіх зіграних чвертях
         quarter_account = informations.get("PS", "")
+        quarter_account_obj = {item["Key"]: item["Value"] for item in quarter_account}
+
         coefficients = data.get("Value", {}).get("GE", {})
+        if not coefficients:
+            return None
         all_additional_coefficients = data.get("Value", {}).get("SG", [])
         for add_coefs in all_additional_coefficients:
             period_in_next = add_coefs.get("PN")
-            additional_coefficients = extract_coefficients(add_coefs)
-            total_additional_coefficients.extend(
-                filter_total_coefficients(additional_coefficients, period_in_next)
-            )
-        total_coefficients = filter_total_coefficients(coefficients)
-        # total_additional_coefficients = filter_total_coefficients(
-        #     additional_coefficients, curr_quarter
-        # )
+            if period_in_next and "quarter" in period_in_next:
+                additional_coefficients = extract_coefficients(add_coefs)
+                total_additional_coefficients.extend(
+                    filter_total_coefficients(additional_coefficients, period_in_next)
+                )
+        total_coefficients = filter_total_coefficients(coefficients, curr_quarter)
 
         # Об'єднуємо результати, якщо потрібно
         all_total_coefficients = total_coefficients + total_additional_coefficients
-    # all_coefficients.extend(current_data)
+        result = {
+            "match_id": match_id,
+            "time": time_in_minute,
+            "cp": cp,
+            "curr_quarter": curr_quarter,
+            "curr_score": curr_score,
+            "quarter_account": quarter_account_obj,
+            "total_coefficients": all_total_coefficients,
+        }
+
     except Exception as err:
         print(err)
 
-    # match_id = coeff.get("match_id")
-    # block_id = coeff.get("block_id")
-    # market_id = coeff.get("market_id")
-    # values = coeff.get("values")
-    # score1 = coeff.get("score1", 0)
-    # score2 = coeff.get("score2", 0)
-    # period = coeff.get("period", "")
-    # time = coeff.get("time", "")
+    return result
 
 
 def transform_data(data):
